@@ -23,13 +23,14 @@ public class Payment {
         paymentApproved.publishAfterCommit();
 
 
-        PaymentCancelled paymentCancelled = new PaymentCancelled();
-        BeanUtils.copyProperties(this, paymentCancelled);
-        paymentCancelled.publishAfterCommit();
-
-
     }
-
+    
+    @PostUpdate      
+    public void onPostUpdate(){  
+    PaymentCancelled paymentCancelled = new PaymentCancelled();
+    BeanUtils.copyProperties(this, paymentCancelled);
+    paymentCancelled.publishAfterCommit();
+    }
 
     public Long getMatchId() {
         return matchId;

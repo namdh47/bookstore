@@ -11,10 +11,10 @@ public class PaymentCancelled extends AbstractEvent {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setMatchId(Long id) {
         this.id = id;
     }
-    public Long getId() {
+    public Long getMatchId() {
         return matchId;
     }
 

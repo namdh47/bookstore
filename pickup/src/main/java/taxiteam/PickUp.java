@@ -20,12 +20,13 @@ public class PickUp {
         PickupAssigned pickupAssigned = new PickupAssigned();
         BeanUtils.copyProperties(this, pickupAssigned);
         pickupAssigned.publishAfterCommit();
-
-
+    }
+    
+    @PostRemove
+    public void onPostRemove(){
         PickupCancelled pickupCancelled = new PickupCancelled();
         BeanUtils.copyProperties(this, pickupCancelled);
         pickupCancelled.publishAfterCommit();
-
 
     }
 

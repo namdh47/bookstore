@@ -15,11 +15,11 @@ public class PaymentApproved extends AbstractEvent {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getId() {
+    public Long getMatchId() {
         return matchId;
     }
 
-    public void setId(Long matchId) {
+    public void setMatchId(Long matchId) {
         this.matchId = matchId;
     }
     public Integer getPrice() {
