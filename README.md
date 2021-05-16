@@ -183,7 +183,7 @@
 
 ### 모델 수정
 
-![image](https://user-images.githubusercontent.com/487999/79684176-4e4c7800-826a-11ea-8deb-b7b053e5d7c6.png)
+![image](https://user-images.githubusercontent.com/45971330/118398496-e5654880-b693-11eb-9980-1ee9f45431b7.png)
     
     - 수정된 모델은 모든 요구사항을 커버함.
 
