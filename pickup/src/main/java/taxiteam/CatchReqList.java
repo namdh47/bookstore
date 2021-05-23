@@ -8,8 +8,10 @@ import java.util.List;
 public class CatchReqList {
 
         @Id
-        @GeneratedValue(strategy=GenerationType.AUTO)
-        private Long id;
+        private Long id;    
+        public Integer price;
+        private String startingPoint;
+        private String destination;
 
 
         public Long getId() {
@@ -19,5 +21,27 @@ public class CatchReqList {
         public void setId(Long id) {
             this.id = id;
         }
-
+        public String getStartingPoint() {
+            return startingPoint;
+        }
+    
+        public void setStartingPoint(String startingPoint) {
+            this.startingPoint = startingPoint;
+        }
+        public String getDestination() {
+            return destination;
+        }
+    
+        public void setDestination(String destination) {
+            this.destination = destination;
+        }
+        
+        public Integer getPrice() {
+            return price;
+        }
+    
+        public void setPrice(Integer price) {
+            this.price = price;
+        }
 }
+

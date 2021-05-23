@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class PolicyHandler{
+    @Autowired CatchReqListRepository CatchReqListRepository;
+    @Autowired PickUpRepository PickUpRepository;
     @StreamListener(KafkaProcessor.INPUT)
     public void onStringEventListener(@Payload String eventString){
 
@@ -19,18 +21,26 @@ public class PolicyHandler{
     public void wheneverPaymentApproved_PickupRequest(@Payload PaymentApproved paymentApproved){
 
         if(paymentApproved.isMe()){
-            System.out.println("##### listener PickupRequest : " + paymentApproved.toJson());
-            System.out.println();
-            System.out.println();
+            System.out.println("##### listener  : " + paymentApproved.toJson());
+
+
+            //승인완료 시 승인완료된 리스트를 저장
+            CatchReqList catchReqList = new CatchReqList();
+            catchReqList.setId(paymentApproved.getMatchId());
+            catchReqList.setDestination(paymentApproved.getDestination());
+            catchReqList.setStartingPoint(paymentApproved.getStartingPoint());
+            catchReqList.setPrice(paymentApproved.getPrice());
+            CatchReqListRepository.save(catchReqList);
         }
     }
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverPaymentCancelled_PickupCancel(@Payload PaymentCancelled paymentCancelled){
 
         if(paymentCancelled.isMe()){
-            System.out.println("##### listener PickupCancel : " + paymentCancelled.toJson());
-            System.out.println();
-            System.out.println();
+            System.out.println("##### listener  : " + paymentCancelled.toJson());
+            PickUpRepository.findById(paymentCancelled.getMatchId()).ifPresent(PickUp->{
+                PickUpRepository.delete(PickUp);
+            });
         }
     }
 

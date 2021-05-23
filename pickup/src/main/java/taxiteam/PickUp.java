@@ -10,7 +10,6 @@ import java.util.Date;
 public class PickUp {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long matchId;
     private String driver;
     private String custmoer;

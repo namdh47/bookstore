@@ -10,7 +10,6 @@ import java.util.Date;
 public class MyPage {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     private Integer price;
     private String startingPoint;

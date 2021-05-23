@@ -6,6 +6,8 @@ public class Payment {
     private Integer price;
     private String paymentAction;
     private String customer;
+    private String startingPoint;
+    private String destination;
 
     public Long getMatchId() {
         return matchId;
@@ -30,6 +32,21 @@ public class Payment {
     }
     public void setCustomer(String customer) {
         this.customer = customer;
+    }
+
+    public String getStartingPoint() {
+        return startingPoint;
+    }
+
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
+    }
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 
 }

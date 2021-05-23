@@ -21,11 +21,11 @@ public class PaymentCancelled extends AbstractEvent {
     public void setId(Long matchId) {
         this.matchId = matchId;
     }
-    public String getStudent() {
+    public String getCustomer() {
         return customer;
     }
 
-    public void setStudent(String customer) {
+    public void setCustomer(String customer) {
         this.customer = customer;
     }
 }

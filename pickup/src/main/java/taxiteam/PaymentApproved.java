@@ -7,7 +7,8 @@ public class PaymentApproved extends AbstractEvent {
     private Long matchId;
     private Integer price;
     private String customer;
-
+    private String startingPoint;
+    private String destination;
     public Long getId() {
         return id;
     }
@@ -29,12 +30,26 @@ public class PaymentApproved extends AbstractEvent {
     public void setPrice(Integer price) {
         this.price = price;
     }
-    public String getStudent() {
+    public String getCustomer() {
         return customer;
     }
 
-    public void setStudent(String customer) {
+    public void setCustomer(String customer) {
         this.customer = customer;
+    }
+    public String getStartingPoint() {
+        return startingPoint;
+    }
+
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
+    }
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 }
 

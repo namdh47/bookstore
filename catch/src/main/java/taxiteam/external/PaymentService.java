@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 
+//url 수정
 @FeignClient(name="payment", url="http://localhost:8088")
 public interface PaymentService {
 

@@ -13,7 +13,6 @@ public class PolicyHandler{
 
     //취소시 Payment Repository를 수정하기위해 저장소 추가
     @Autowired PaymentRepository PaymentRepository;
-
     @StreamListener(KafkaProcessor.INPUT)
     public void onStringEventListener(@Payload String eventString){
 

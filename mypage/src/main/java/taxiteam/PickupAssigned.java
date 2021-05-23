@@ -7,18 +7,18 @@ public class PickupAssigned extends AbstractEvent {
     private String driver;
     private String custmoer;
 
-    public Long getId() {
+    public Long getMatchId() {
         return matchId;
     }
 
-    public void setId(Long matchId) {
+    public void setMatchId(Long matchId) {
         this.matchId = matchId;
     }
-    public String getDrivers() {
+    public String getDriver() {
         return driver;
     }
 
-    public void setDrivers(String driver) {
+    public void setDriver(String driver) {
         this.driver = driver;
     }
     public String getCustmoer() {

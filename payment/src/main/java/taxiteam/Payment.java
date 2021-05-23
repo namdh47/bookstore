@@ -10,12 +10,12 @@ import java.util.Date;
 public class Payment {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long matchId;
     private Integer price;
     private String paymentAction;
     private String customer;
-
+    private String startingPoint;
+    private String destination;
     @PostPersist
     public void onPostPersist(){
         PaymentApproved paymentApproved = new PaymentApproved();
@@ -26,11 +26,12 @@ public class Payment {
     }
     
     @PostUpdate      
-    public void onPostUpdate(){  
+    public void onPostUpdate(){      
     PaymentCancelled paymentCancelled = new PaymentCancelled();
     BeanUtils.copyProperties(this, paymentCancelled);
     paymentCancelled.publishAfterCommit();
     }
+
 
     public Long getMatchId() {
         return matchId;
@@ -60,7 +61,20 @@ public class Payment {
     public void setCustomer(String customer) {
         this.customer = customer;
     }
+    public String getStartingPoint() {
+        return startingPoint;
+    }
 
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
+    }
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
 
 
 
