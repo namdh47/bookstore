@@ -229,24 +229,62 @@ mvn spring-boot:run
 
 ## DDD 의 적용
 
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용했다. 모든 구현에있어 영어로 사용하여 에러는 없었다.
 
 ```
-package fooddelivery;
+package taxiteam;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
+import java.util.Date;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="Catch_table")
+public class Catch {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String orderId;
-    private Double 금액;
+    private Integer price;
+    private String startingPoint;
+    private String destination;
+    private String customer;
+    //고객의 명령 상태(승인 or 취소)를 표현하기위한 변수 추가
+    private String status;
+
+    //최초 결재 승인 요청 액션
+    @PostPersist
+    public void onPostPersist(){
+        
+        CatchRequested catchRequested = new CatchRequested();
+        BeanUtils.copyProperties(this, catchRequested);
+        catchRequested.publishAfterCommit();
+
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
+        taxiteam.external.Payment payment = new taxiteam.external.Payment();
+        // mappings goes here 
+        payment.setMatchId(Long.valueOf(this.getId()));
+        payment.setPrice(Integer.valueOf(this.getPrice()));
+        payment.setPaymentAction("Approved");
+        payment.setCustomer(String.valueOf(this.getCustomer()));
+        payment.setStartingPoint(String.valueOf(this.getStartingPoint()));
+        payment.setDestination(String.valueOf(this.getDestination()));
+        CatchApplication.applicationContext.getBean(taxiteam.external.PaymentService.class)
+            .paymentRequest(payment);
+
+    }
+
+    //사용자가 해당 결재건 취소 했을 경우. (status를 Cancel로 업데이트 보냄) 
+    @PreUpdate
+    public void onPreupdate(){
+        if("Cancel".equals(status)){
+            CatchCancelled catchCancelled = new CatchCancelled();
+            BeanUtils.copyProperties(this, catchCancelled);
+            catchCancelled.publishAfterCommit();
+        }
+    }
+
 
     public Long getId() {
         return id;
@@ -255,45 +293,71 @@ public class 결제이력 {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getOrderId() {
-        return orderId;
+    public Integer getPrice() {
+        return price;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public void setPrice(Integer price) {
+        this.price = price;
     }
-    public Double get금액() {
-        return 금액;
-    }
-
-    public void set금액(Double 금액) {
-        this.금액 = 금액;
+    public String getStartingPoint() {
+        return startingPoint;
     }
 
+    public void setStartingPoint(String startingPoint) {
+        this.startingPoint = startingPoint;
+    }
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+    public String getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+
+    public String getStatus() { 
+        return status; 
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
-
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package fooddelivery;
+package taxiteam;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
+//import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-public interface 결제이력Repository extends PagingAndSortingRepository<결제이력, Long>{
+//@RepositoryRestResource(collectionResourceRel="catches", path="catches")
+public interface CatchRepository extends PagingAndSortingRepository<Catch, Long>{
+
 }
+
 ```
 - 적용 후 REST API 의 테스트
 ```
 # catch 서비스의 요청처리
 http post "http://localhost:8081/catches" id=5000 price=25000 startingPoint="busan" destination='seoul' customer='kim'  status="approve"
+```
 ![image](https://user-images.githubusercontent.com/45971330/119359070-30124080-bce4-11eb-9ff6-d8a5a360687d.png)
-
+```
 # catch 서비스의 상태확인 
 http  localhost:8081/catches/5000
+```
 ![image](https://user-images.githubusercontent.com/45971330/119359438-95fec800-bce4-11eb-8714-95975e4a7243.png)
-
+```
 # catch 서비스에 대한 pickup 서비스의 응답
 http "http://localhost:8082/pickUps" matchId=5000 driver="BESTDRIVER"
+```
 ![image](https://user-images.githubusercontent.com/45971330/119359816-f857c880-bce4-11eb-81ea-09c36f05ff20.png)
 
 
