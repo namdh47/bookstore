@@ -570,11 +570,18 @@ http http://localhost:8083/payments
 cd pickup
 mvn spring-boot:run
 ```
+-pickup service 요청 목록 확인
 
-#주문상태 확인
-http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 확인
 ```
+http "http://localhost:8082/catchReqLists"     # 정상적으로 요청이 들어온 것 확인
+```
+![image](https://user-images.githubusercontent.com/45971330/119368460-0100cc80-bcee-11eb-85a0-a283cef8346b.png)
 
+-pickup 기능 확인
+```
+http "http://localhost:8082/pickUps" matchId=2000 driver="TESTBESTDRIVER" #정상적으로 매핑
+```
+![image](https://user-images.githubusercontent.com/45971330/119368709-51782a00-bcee-11eb-8a20-1387ca5fcbb9.png)
 
 # 운영
 
