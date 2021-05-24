@@ -361,8 +361,6 @@ http "http://localhost:8082/pickUps" matchId=5000 driver="BESTDRIVER"
 ![image](https://user-images.githubusercontent.com/45971330/119359816-f857c880-bce4-11eb-81ea-09c36f05ff20.png)
 
 
-```
-
 ## 폴리글랏 퍼시스턴스
 
 catch 서비스는 다른 서비스와 구별을 위해 hsqldb를 사용 하였다. 이를 위해 catchh내 pom.xml에 dependency를 h2database에서 hsqldb로 변경 하였다.
