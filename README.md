@@ -353,16 +353,29 @@ public interface PaymentService {
 
 - 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
 ```
-# Order.java (Entity)
+# Catch.java (Entity)
+
 
     @PostPersist
     public void onPostPersist(){
-
-        fooddelivery.external.결제이력 pay = new fooddelivery.external.결제이력();
-        pay.setOrderId(getOrderId());
         
-        Application.applicationContext.getBean(fooddelivery.external.결제이력Service.class)
-                .결제(pay);
+        CatchRequested catchRequested = new CatchRequested();
+        BeanUtils.copyProperties(this, catchRequested);
+        catchRequested.publishAfterCommit();
+
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
+        taxiteam.external.Payment payment = new taxiteam.external.Payment();
+        // mappings goes here 
+        payment.setMatchId(Long.valueOf(this.getId()));
+        payment.setPrice(Integer.valueOf(this.getPrice()));
+        payment.setPaymentAction("Approved");
+        payment.setCustomer(String.valueOf(this.getCustomer()));
+        payment.setStartingPoint(String.valueOf(this.getStartingPoint()));
+        payment.setDestination(String.valueOf(this.getDestination()));
+        CatchApplication.applicationContext.getBean(taxiteam.external.PaymentService.class)
+            .paymentRequest(payment);
+
     }
 ```
 
@@ -431,7 +444,7 @@ public class Payment {
 ```
 - pickup 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
-...
+```
 
 package taxiteam;
 
