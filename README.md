@@ -469,7 +469,7 @@ http post "http://localhost:8081/catches" id=4000 price=20000 startingPoint="tes
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-# 비동기식 호출
+### 비동기식 호출
 
 결제가 이루어진 후에 이를 pickup 시스템으로 알려주는 행위는 동기가 아닌 비동기 식으로 구현하여, 택시잡기/결제시스템에 블로킹을 주지않는다. 
  
@@ -545,39 +545,31 @@ public class PolicyHandler{
     }
 
 ```
-실제 구현을 하자면, 카톡 등으로 점주는 노티를 받고, 요리를 마친후, 주문 상태를 UI에 입력할테니, 우선 주문정보를 DB에 받아놓은 후, 이후 처리는 해당 Aggregate 내에서 하면 되겠다.:
-  
-```
-  @Autowired 주문관리Repository 주문관리Repository;
-  
-  @StreamListener(KafkaProcessor.INPUT)
-  public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
 
-      if(결제승인됨.isMe()){
-          카톡전송(" 주문이 왔어요! : " + 결제승인됨.toString(), 주문.getStoreId());
+### 시간적 디커플링 / 장애격리
 
-          주문관리 주문 = new 주문관리();
-          주문.setId(결제승인됨.getOrderId());
-          주문관리Repository.save(주문);
-      }
-  }
+pickup 서비스와 payment 시스템은 전혀 결합성이 없어, 만약 pickup시스템이 에러가 생기더라도 고객이 차 배차(catch 시스템) 결제(payment)시스템이 정상적으로 되야한다.  
+
+-pickup 서비스를 잠시 종료한 후 배차/결제 요청
 
 ```
-
-상점 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 상점시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+#배차처리
+http post "http://localhost:8081/catches" id=2000 price=10000 startingPoint="test2" destination='test2' customer='yoon'  status="approve" #Success
 ```
-# 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
+![image](https://user-images.githubusercontent.com/45971330/119366849-56d47500-bcec-11eb-85f7-3f9553d3e5df.png)
 
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Success
-http localhost:8081/orders item=피자 storeId=2   #Success
+-결제서비스(payment)가 정상적으로 동작했는지 조회
 
-#주문상태 확인
-http localhost:8080/orders     # 주문상태 안바뀜 확인
+```
+http http://localhost:8083/payments 
+```
+![image](https://user-images.githubusercontent.com/45971330/119367167-a4e97880-bcec-11eb-94e3-92e27fa84f8e.png)
 
-#상점 서비스 기동
-cd 상점
+-pickup 서비스 재가동
+```
+cd pickup
 mvn spring-boot:run
+```
 
 #주문상태 확인
 http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 확인
