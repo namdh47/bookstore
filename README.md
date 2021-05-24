@@ -374,9 +374,10 @@ public interface PaymentService {
 
 #주문처리
 http post "http://localhost:8081/catches" id=4000 price=20000 startingPoint="test1" destination='test1' customer='lee'  status="approve" # Fail
+```
 ![image](https://user-images.githubusercontent.com/45971330/119361205-5e911b00-bce6-11eb-8f9b-b6053ae3fdef.png)
 
-
+```
 #결제서비스 재기동
 cd payment
 mvn spring-boot:run
