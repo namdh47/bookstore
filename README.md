@@ -670,7 +670,8 @@ public class PolicyHandler{
     }
 
 ```
-- mypage view조회
+mypage view조회
+
 ![image](https://user-images.githubusercontent.com/45971330/119369639-60aba780-bcef-11eb-94c2-7b0c909fd825.png)
 
 
