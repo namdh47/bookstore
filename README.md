@@ -584,7 +584,27 @@ http "http://localhost:8082/pickUps" matchId=2000 driver="TESTBESTDRIVER" #정�
 ![image](https://user-images.githubusercontent.com/45971330/119368709-51782a00-bcee-11eb-8a20-1387ca5fcbb9.png)
 
 ### SAGA/Correlation
+픽업(pickup) 시스템에서 상태가 매칭으로 변경되면 매치(catch) 시스템 원천데이터의 상태(status) 정보가 update된다
+```
+    }
+    
+    //PickUp이 됐을 경우
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverPickupAssigned_StatusUpdate(@Payload PickupAssigned pickupAssigned){
 
+        if(pickupAssigned.isMe()){
+
+            System.out.println("##### listener wheneverPickupAssigned : " + pickupAssigned.toJson());
+
+            CatchRepository.findById(pickupAssigned.getId()).ifPresent(Catch ->{
+                System.out.println("##### wheneverPickupAssigned_MatchRepository.findById : exist" );
+                Catch.setStatus(pickupAssigned.getEventType()); 
+                CatchRepository.save(Catch);
+            });
+        }
+    }
+
+```
 ### CQRS
 status가 변경될때마다 event를 수신하여 조회하도록 view를 구현했다. 
 ```
