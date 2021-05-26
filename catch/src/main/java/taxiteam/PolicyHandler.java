@@ -25,7 +25,7 @@ public class PolicyHandler{
 
             System.out.println("##### listener wheneverPickupAssigned : " + pickupAssigned.toJson());
 
-            CatchRepository.findById(pickupAssigned.getId()).ifPresent(Catch ->{
+            CatchRepository.findById(pickupAssigned.getMatchId()).ifPresent(Catch ->{
                 System.out.println("##### wheneverPickupAssigned_MatchRepository.findById : exist" );
                 Catch.setStatus(pickupAssigned.getEventType()); 
                 CatchRepository.save(Catch);

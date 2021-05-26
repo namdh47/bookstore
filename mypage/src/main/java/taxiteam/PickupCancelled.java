@@ -6,11 +6,11 @@ public class PickupCancelled extends AbstractEvent {
     private Long matchId;
     private String customer;
 
-    public Long getId() {
+    public Long getMatchId() {
         return matchId;
     }
 
-    public void setId(Long matchId) {
+    public void setMatchId(Long matchId) {
         this.matchId = matchId;
     }
     public String getDrivers() {
