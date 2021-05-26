@@ -550,7 +550,7 @@ public class PolicyHandler{
 
 pickup 서비스와 payment 시스템은 전혀 결합성이 없어, 만약 pickup시스템이 에러가 생기더라도 고객이 차 배차(catch 시스템) 결제(payment)시스템이 정상적으로 되야한다.  
 
--pickup 서비스를 잠시 종료한 후 배차/결제 요청
+-pick up 서비스를 잠시 종료한 후 배차/결제 요청
 
 ```
 #배차처리
