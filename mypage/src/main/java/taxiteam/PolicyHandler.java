@@ -35,7 +35,7 @@ public class PolicyHandler{
 
       
         if(paymentCancelled.isMe()){
-        MyPageRepository.findById(paymentCancelled.getId()).ifPresent(MyPage ->{
+        MyPageRepository.findById(paymentCancelled.getMatchId()).ifPresent(MyPage ->{
             System.out.println("##### listener  : " + paymentCancelled.toJson());
             System.out.println("##### wheneverPaymentCancelled_MyPageRepository.findById : exist" );
             MyPage.setStatus(paymentCancelled.getEventType());
@@ -55,6 +55,8 @@ public class PolicyHandler{
             mypage.setStatus(paymentApproved.getEventType());
             mypage.setDestination(paymentApproved.getDestination());
             mypage.setStartingPoint(paymentApproved.getStartingPoint());
+            //최초 콜 요청시 customer 이름도 저장 , 05/26 수정
+            mypage.setCustomer(paymentApproved.getCustomer());
             MyPageRepository.save(mypage);
         }
     }
@@ -80,7 +82,7 @@ public class PolicyHandler{
 
 
         if(pickupCancelled.isMe()){
-        MyPageRepository.findById(pickupCancelled.getId()).ifPresent(MyPage ->{
+        MyPageRepository.findById(pickupCancelled.getMatchId()).ifPresent(MyPage ->{
             System.out.println("##### listener  : " + pickupCancelled.toJson());
             System.out.println("##### wheneverPickupCancelled_MyPageRepository.findById : exist" );
             MyPage.setStatus(pickupCancelled.getEventType());

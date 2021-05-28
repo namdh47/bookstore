@@ -3,16 +3,13 @@ package taxiteam;
 
 public class PaymentCancelled extends AbstractEvent {
 
-    private Long id;
+
     private Long matchId;
     private String customer;
 
-    public Long getId() {
-        return id;
-    }
 
     public void setMatchId(Long id) {
-        this.id = id;
+        this.matchId = matchId;
     }
     public Long getMatchId() {
         return matchId;
