@@ -43,7 +43,7 @@ public class Catch {
 
     //사용자가 해당 결재건 취소 했을 경우. (status를 Cancel로 업데이트 보냄) 
     @PreUpdate
-    public void onPreupdate(){
+    public void onPreUpdate(){
         if("Cancel".equals(status)){
             CatchCancelled catchCancelled = new CatchCancelled();
             BeanUtils.copyProperties(this, catchCancelled);

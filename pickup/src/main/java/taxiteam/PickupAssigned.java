@@ -5,7 +5,7 @@ public class PickupAssigned extends AbstractEvent {
 
     private Long matchId;
     private String driver;
-    private String custmoer;
+    private String customer;
 
     public Long getMatchId() {
         return matchId;
@@ -21,12 +21,12 @@ public class PickupAssigned extends AbstractEvent {
     public void setDriver(String driver) {
         this.driver = driver;
     }
-    public String getCustmoer() {
-        return custmoer;
+    public String getCustomer() {
+        return customer;
     }
 
-    public void setCustmoer(String custmoer) {
-        this.custmoer = custmoer;
+    public void setCustomer(String customer) {
+        this.customer = customer;
     }
 }
 

@@ -12,7 +12,7 @@ public class PickUp {
     @Id
     private Long matchId;
     private String driver;
-    private String custmoer;
+    private String customer;
 
     @PostPersist
     public void onPostPersist(){
@@ -44,12 +44,12 @@ public class PickUp {
     public void setDriver(String driver) {
         this.driver = driver;
     }
-    public String getCustmoer() {
-        return custmoer;
+    public String getCustomer() {
+        return customer;
     }
 
-    public void setCustmoer(String custmoer) {
-        this.custmoer = custmoer;
+    public void setCustomer(String customer) {
+        this.customer = customer;
     }
 
 

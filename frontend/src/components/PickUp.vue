@@ -37,10 +37,10 @@
           </div>
 
           <div class="grey--text ml-4" v-if="editMode" style = "margin-top:-20px;">
-            <v-text-field label="Custmoer" v-model="value.custmoer"/>
+            <v-text-field label="Customer" v-model="value.customer"/>
           </div>
           <div class="grey--text ml-4" v-else>
-            Custmoer :  {{value.custmoer }}
+            Customer :  {{value.customer }}
           </div>
 
 
