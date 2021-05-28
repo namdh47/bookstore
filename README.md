@@ -6,23 +6,28 @@
 # Table of contents
 
 - [택시 호출 서비스](#---)
-  - [서비스 시나리오 및 요구사항 분석](#서비스 시나리오 및 요구사항 분석)
-    - [서비스 개요 및 시나리오]
-    - 
+  - [서비스 시나리오 및 요구사항 분석](#서비스-시나리오-및-요구사항-분석)
+    - 서비스 개요 및 시나리오
+    - 요구사항
   - [체크포인트](#체크포인트)
   - [분석/설계](#분석설계)
-  - [구현:](#구현-)
-    - [DDD 의 적용](#ddd-의-적용)
-    - [폴리글랏 퍼시스턴스](#폴리글랏-퍼시스턴스)
-    - [폴리글랏 프로그래밍](#폴리글랏-프로그래밍)
-    - [동기식 호출 과 Fallback 처리](#동기식-호출-과-Fallback-처리)
-    - [비동기식 호출 과 Eventual Consistency](#비동기식-호출-과-Eventual-Consistency)
-  - [운영](#운영)
-    - [CI/CD 설정](#cicd설정)
-    - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출-서킷-브레이킹-장애격리)
-    - [오토스케일 아웃](#오토스케일-아웃)
-    - [무정지 재배포](#무정지-재배포)
+    - 개요 및 구성 목표
+    - 서비스 설계를 위한 Event Storming
+    - 헥사고날 아키텍처 다이어그램 도출
+  - [구현방안 및 검증](#구현방안-및-검증)
+    - DDD 의 적용
+    - 폴리글랏 퍼시스턴스
+    - 동기식 호출 과 Fallback 처리
+    - 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성
+    - SAGA / Correlation
+    - CQRS
+  - [베포 및 운영](#베포-및-운영)
+    - CI/CD 설정
+    - 동기식 호출 / 서킷 브레이킹 / 장애격리
+    - 오토스케일 아웃
+    - 무정지 재배포
   - [신규 개발 조직의 추가](#신규-개발-조직의-추가)
+
 
 # 서비스 시나리오 및 요구사항 분석
 
@@ -44,7 +49,6 @@
  6. 고객은 매칭을 취소할 수 있다. 
  7. 고객은 마이페이지에서 택시 배정 요청 상태를 확인할 수 있다. 
  8. 고객이 요청 상태를 수시로 조회할 수 있다
-
 
 - 비기능적 요구사항
  1. 트랜잭션
@@ -74,12 +78,13 @@
 - Polyglot
 - Self-healing (Liveness Probe)
 
+
 # 분석/설계
 
 
 ## 개요 및 구성 목표
 - 구성원 개인 역할 중심의 Horizontally-Aligned 조직에서 서비스 중심의 Vertically-Aligned 조직으로 전환되면서
-각 서비스를 분리하여 Domain-driven한 마이크로서비스 아키텍쳐를 클라우드 네이티브하게 구현한다
+각 서비스를 분리하여 Domain-driven한 마이크로서비스 아키텍쳐를 클라우드 네이티브하게 구현한다.
 
 
 ### AS-IS 조직 (Horizontally-Aligned)
@@ -90,10 +95,11 @@
 ![image](https://user-images.githubusercontent.com/81601230/119945590-9f33b180-bfd0-11eb-9ef7-1abd5afb5b2b.png)
 
 
-## 서비스 설계를 위한 Event Storming 결과
+## 서비스 설계를 위한 Event Storming
 - MSAEz를 이용하여 Event Storming을 진행하였다.
 - 결과 링크:  http://www.msaez.io/#/storming/PF1pfRP3vaXhLUEUMVj8lFZ1FIi2/every/3c1d852da14f8f3c6a2f41b8cc54eecd
-
+- 도출 순서는 다음과 같다.
+- **이벤트 도출 - 부적격 이벤트 탈락 - 액터/커맨드 - 어그리게잇 - 바인디드 컨텍스트 - 폴리시 - 컨텍스트 매핑 - 요구사항 검증 및 보완**
 
 ### 이벤트 도출
 ![image](https://user-images.githubusercontent.com/81601230/119945899-00f41b80-bfd1-11eb-8914-bac35185b49f.png)
@@ -177,10 +183,10 @@
     - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
     
 
-# 구현:
+# 구현방안 및 검증
 
-- 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 Spring Boot로 구현하였다.
-구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
+- 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 **Spring Boot**로 구현하였다.
+- 구현한 각 서비스  로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8084 이다)
 
 ```
 cd catch
@@ -198,8 +204,9 @@ mvn spring-boot:run
 
 
 ## DDD 의 적용
-- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스).
-이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용했다. 모든 구현에있어 영어로 사용하여 에러는 없었다.
+- 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 Catch 마이크로 서비스).
+- Event Storming을 통한 아키텍쳐와 Domain 구조로 DDD의 적용을 확인 며, 각 Domain에 해당하는 Entity는 다음과 같다.
+- **Catch(택시 요청) / Payment(결제 이력) / Pickup(택시 매칭)**
 
 ```
 package taxiteam;
@@ -300,8 +307,8 @@ public class Catch {
     }
 }
 ```
-- Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록
-데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
+- **Entity Pattern** 과 **Repository Pattern** 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록
+데이터 접근 어댑터를 자동 생성하기 위하여 **Spring Data REST** 의 RestRepository 를 적용하였다
 ```
 package taxiteam;
 
@@ -314,6 +321,8 @@ public interface CatchRepository extends PagingAndSortingRepository<Catch, Long>
 }
 
 ```
+---
+#### 검증 및 테스트
 - 적용 후 REST API 의 테스트
 ```
 # catch 서비스의 요청처리
@@ -358,7 +367,7 @@ http "http://localhost:8082/pickUps" matchId=5000 driver="BESTDRIVER"
 
 ## 동기식 호출 과 Fallback 처리
 - 분석단계에서의 조건 중 하나로 콜요청(catch)->결제(payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다.
-호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 **FeignClient** 를 이용하여 호출하도록 한다. 
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
@@ -410,6 +419,9 @@ public interface PaymentService {
 
     }
 ```
+---
+#### 검증 및 테스트
+- 서비스를 임의로 정지하여 
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
 ```
 # 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
@@ -436,7 +448,7 @@ http post "http://localhost:8081/catches" id=4000 price=20000 startingPoint="tes
 
 ### 비동기식 호출
 - 결제가 이루어진 후에 이를 pickup 시스템으로 알려주는 행위는 동기가 아닌 비동기 식으로 구현하여, 택시잡기/결제시스템에 블로킹을 주지않는다. 
-- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 **Apache Kafka**로 송출한다(Publish)
  
 ```
 package taxiteam;
@@ -510,7 +522,9 @@ public class PolicyHandler{
 
 
 ### 시간적 디커플링 / 장애격리
-- pickup 서비스와 payment 시스템은 전혀 결합성이 없어, 만약 pickup시스템이 에러가 생기더라도 고객이 차 배차(catch 시스템) 결제(payment)시스템이 정상적으로 되야한다.  
+- pickup 서비스와 payment 시스템은 전혀 결합성이 없어, 만약 pickup시스템이 에러가 생기더라도 고객이 차 배차(catch 시스템) 결제(payment)시스템이 정상적으로 되야한다.
+---
+#### 검증 및 테스트
 - pick up 서비스를 잠시 종료한 후 배차/결제 요청
 
 ```
@@ -545,7 +559,7 @@ http "http://localhost:8082/pickUps" matchId=2000 driver="TESTBESTDRIVER" #정�
 ![image](https://user-images.githubusercontent.com/45971330/119368709-51782a00-bcee-11eb-8a20-1387ca5fcbb9.png)
 
 
-### SAGA/Correlation
+## SAGA / Correlation
 - 픽업(pickup) 시스템에서 상태가 매칭으로 변경되면 매치(catch) 시스템 원천데이터의 상태(status) 정보가 update된다
 ```
     }
@@ -569,8 +583,8 @@ http "http://localhost:8082/pickUps" matchId=2000 driver="TESTBESTDRIVER" #정�
 ```
 
 
-### CQRS
-- status가 변경될때마다 event를 수신하여 조회하도록 view를 구현했다. 
+## CQRS
+- status가 변경될때마다 event를 수신하여 조회하도록 별도의 view를 구현하여 명령과 조회를 분리했다. 
 ```
 @Service
 public class PolicyHandler{
@@ -681,6 +695,8 @@ hystrix:
       execution.isolation.thread.timeoutInMilliseconds: 610
 
 ```
+---
+#### 검증 및 테스트
 - 피호출 서비스(결제:pay) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
 ```
 # (pay) 결제이력.java (Entity)
@@ -697,7 +713,7 @@ hystrix:
         }
     }
 ```
-* 부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인:
+* 부하테스터 **siege** 툴을 통한 서킷 브레이커 동작 확인:
 - 동시사용자 100명
 - 60초 동안 실시
 ```
@@ -844,6 +860,8 @@ Shortest transaction:	        0.00
 ```
 kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=15
 ```
+---
+#### 검증 및 테스트
 - CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
 ```
 siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
@@ -912,6 +930,8 @@ Concurrency:		       96.02
 
 kubectl apply -f kubernetes/deployment.yaml
 ```
+---
+#### 검증 및 테스트
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
 ```
 Transactions:		        3078 hits
@@ -991,3 +1011,10 @@ Request/Response 방식으로 구현하지 않았기 때문에 서비스가 더�
         **/
     }
 ```
+
+
+![image](https://user-images.githubusercontent.com/45971330/118398020-b948c800-b691-11eb-84f0-f69f29b29017.png)
+
+
+
+
