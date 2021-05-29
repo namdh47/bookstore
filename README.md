@@ -147,16 +147,16 @@
 ### 1차 완성본에 대한 기능적 요구사항 검증
 ![image](https://user-images.githubusercontent.com/81601230/119946533-b1621f80-bfd1-11eb-930e-b52cf4eb241c.png)
 
-    - 고객이 메뉴를 선택하여 주문한다 (ok)
-    - 고객이 결제한다 (ok)
-    - 주문이 되면 주문 내역이 입점상점주인에게 전달된다 (ok)
-    - 상점주인이 확인하여 요리해서 배달 출발한다 (ok) -------------------수정필요
+    - 고객이 출발지,목적지,비용을 기입한다 (ok)
+    - 고객이 비용을 결제한다 (ok)
+    - 고객이 결제하면 택시기사들은 요청목록을 확인하고 매칭을 확정할 수 있다 (ok)
+    - 택시기사가 출발지로 출발한다 (ok) -------------------추가 수정필요 여부 확인 필요(modified by 피터오)
 
 ![image](https://user-images.githubusercontent.com/81601230/119946576-bc1cb480-bfd1-11eb-96f4-84252a9e4452.png)
     - 고객이 주문을 취소할 수 있다 (ok)
-    - 주문이 취소되면 배달이 취소된다 (ok)
-    - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok) 
-    - 주문상태가 바뀔 때 마다 카톡으로 알림을 보낸다 (?) -------------------수정필요
+    - 주문이 취소되면 택시 매칭이 취소된다 (ok)
+    - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok)
+    - 주문, 매칭 상태가 바뀔 때 마다 mypage를 통해 확인한다 (?) -------------------추가 수정필요 여부 확인 필요(modified by 피터오)
 
 
 ### 모델 수정
@@ -169,14 +169,14 @@
 ![image](https://user-images.githubusercontent.com/81601230/119946668-d787bf80-bfd1-11eb-9928-2d6610a9b84a.png)
 
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
-        - 고객 주문시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문와료시 결제처리에 대해서는 Request-Response 방식 처리
-        - 결제 완료시 점주연결 및 배송처리:  App(front) 에서 Store 마이크로서비스로 주문요청이 전달되는 과정에 있어서 Store 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
-        - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함. -------------------수정필요
+    - 고객 주문 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문완료 시 결제처리에 대해서는 Request-Response 방식 처리
+    - 결제 완료 시 기사연결 매칭처리:  catch 에서 pickup 마이크로서비스로 매칭요청이 전달되는 과정에 있어서 pickup 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
+    - 나머지 모든 inter-microservice 트랜잭션: 결재상태, 매칭상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함. -------------------수정필요 여부 확인 필요 (modified by 피터오)
 
 
 ## 헥사고날 아키텍처 다이어그램 도출
-![image](https://user-images.githubusercontent.com/81601230/119948339-b2944c00-bfd3-11eb-91b7-e2088d711b63.png)
--------------------수정필요
+![image](https://user-images.githubusercontent.com/11955597/120057954-46245600-c082-11eb-8873-c5345b3d1348.png)
+-------------------추가 수정필요 여부 확인 필요 (modified by 피터오)
 
     - Chris Richardson, MSA Patterns 참고하여 Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
