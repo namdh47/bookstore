@@ -192,13 +192,13 @@
 cd catch
 mvn spring-boot:run
 
-cd mypage
+cd pickup
 mvn spring-boot:run  
 
 cd payment
 mvn spring-boot:run 
 
-cd pickup
+cd mypage
 mvn spring-boot:run  
 ```
 
@@ -326,17 +326,17 @@ public interface CatchRepository extends PagingAndSortingRepository<Catch, Long>
 - 적용 후 REST API 의 테스트
 ```
 # catch 서비스의 요청처리
-http post "http://localhost:8081/catches" id=5000 price=25000 startingPoint="busan" destination='seoul' customer='kim'  status="approve"
+http POST http://localhost:8081/catches id=5000 price=25000 startingPoint=busan destination=seoul customer=kim  status=approve
 ```
 ![image](https://user-images.githubusercontent.com/45971330/119359070-30124080-bce4-11eb-9ff6-d8a5a360687d.png)
 ```
 # catch 서비스의 상태확인 
-http  localhost:8081/catches/5000
+http http://localhost:8081/catches/5000
 ```
 ![image](https://user-images.githubusercontent.com/45971330/119359438-95fec800-bce4-11eb-8714-95975e4a7243.png)
 ```
 # catch 서비스에 대한 pickup 서비스의 응답
-http "http://localhost:8082/pickUps" matchId=5000 driver="BESTDRIVER"
+http http://localhost:8082/pickUps matchId=5000 driver=BESTDRIVER
 ```
 ![image](https://user-images.githubusercontent.com/45971330/119359816-f857c880-bce4-11eb-81ea-09c36f05ff20.png)
 
