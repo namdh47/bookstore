@@ -9,7 +9,8 @@ import java.util.Date;
 @Table(name="Catch_table")
 public class Catch {
 
-    @Id
+    @Id 
+    @GeneratedValue
     private Long id;
     private Integer price;
     private String startingPoint;

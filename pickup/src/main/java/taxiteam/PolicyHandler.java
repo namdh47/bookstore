@@ -41,6 +41,12 @@ public class PolicyHandler{
             PickUpRepository.findById(paymentCancelled.getMatchId()).ifPresent(PickUp->{
                 PickUpRepository.delete(PickUp);
             });
+
+            //취소 요청 시, CatchReqList에서도 삭제 추가 05/30
+            CatchReqListRepository.findById(paymentCancelled.getMatchId()).ifPresent(PickUp->{
+                CatchReqListRepository.delete(PickUp);
+            });
+            
         }
     }
 
