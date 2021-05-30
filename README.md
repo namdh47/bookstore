@@ -683,10 +683,14 @@ pipeline build script 는 각 프로젝트 폴더 이하에 cloudbuild.yml 에 �
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 * 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
-- 시나리오는 단말앱(app)-->결제(pay) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB 를 통하여 장애격리.
+- 시나리오는 택시 요청(catch)-->결제(payment) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB(Circuit Breaker) 를 통하여 장애격리.
 - Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
 ```
-# application.yml
+# application.yml (catch 서비스)
+
+feign:
+  hystrix:
+    enabled: true
 
 hystrix:
   command:
@@ -695,14 +699,17 @@ hystrix:
       execution.isolation.thread.timeoutInMilliseconds: 610
 
 ```
+![image](https://user-images.githubusercontent.com/11955597/120107288-7b709700-c19b-11eb-9aa5-e89f60ab9537.png)
+
+
 ---
 #### 검증 및 테스트
-- 피호출 서비스(결제:pay) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
+- 피호출 서비스(결제:payment) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
 ```
-# (pay) 결제이력.java (Entity)
+# Payment.java (Entity)
 
-    @PrePersist
-    public void onPrePersist(){  //결제이력을 저장한 후 적당한 시간 끌기
+    @PostPersist
+    public void onPostPersist(){  //결제이력을 저장한 후 적당한 시간 끌기
 
         ...
         
@@ -713,140 +720,31 @@ hystrix:
         }
     }
 ```
+* seige 툴 사용법
+```
+siege가 설치된 apexacme/nginx 이미지로 default namespace 에 siege 란 이름으로 pod 생성
+$ kubectl run siege --image=apexacme/siege-nginx -n default
+
+siege pod 에 접속
+$ kubectl exec -it siege -c siege -n default -- /bin/bash
+```
+
 * 부하테스터 **siege** 툴을 통한 서킷 브레이커 동작 확인:
 - 동시사용자 100명
-- 60초 동안 실시
+- 60초 동안 10번 반복하여 실시
 ```
-$ siege -c100 -t60S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
+$ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080/catches POST {"price":"250000", "startingPoint":"Kwangjoo", "destination":"Chooncheon", "customer":"SteveOh", "status":"approve"}'
 
-** SIEGE 4.0.5
-** Preparing 100 concurrent users for battle.
-The server is now under siege...
+* 부하 발생하여 CB가 발동하여 요청 실패처리하였고, 밀린 부하가 pay에서 처리되면서 다시 order를 받기 시작
+![image](https://user-images.githubusercontent.com/11955597/120107709-1027c480-c19d-11eb-90fd-7cda05bbb08b.png)
 
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.73 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.75 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.77 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.97 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.81 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.87 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.12 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.16 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.17 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.26 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.25 secs:     207 bytes ==> POST http://localhost:8081/orders
+* report
+![image](https://user-images.githubusercontent.com/11955597/120108116-b32d0e00-c19e-11eb-9ca5-684a9f32590b.png)
 
-* 요청이 과도하여 CB를 동작함 요청을 차단
-
-HTTP/1.1 500     1.29 secs:     248 bytes ==> POST http://localhost:8081/orders   
-HTTP/1.1 500     1.24 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     1.23 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     1.42 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     2.08 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.29 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     1.24 secs:     248 bytes ==> POST http://localhost:8081/orders
-
-* 요청을 어느정도 돌려보내고나니, 기존에 밀린 일들이 처리되었고, 회로를 닫아 요청을 다시 받기 시작
-
-HTTP/1.1 201     1.46 secs:     207 bytes ==> POST http://localhost:8081/orders  
-HTTP/1.1 201     1.33 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.36 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.63 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.65 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.69 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.71 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.71 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.74 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.76 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     1.79 secs:     207 bytes ==> POST http://localhost:8081/orders
-
-* 다시 요청이 쌓이기 시작하여 건당 처리시간이 610 밀리를 살짝 넘기기 시작 => 회로 열기 => 요청 실패처리
-
-HTTP/1.1 500     1.93 secs:     248 bytes ==> POST http://localhost:8081/orders    
-HTTP/1.1 500     1.92 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     1.93 secs:     248 bytes ==> POST http://localhost:8081/orders
-
-* 생각보다 빨리 상태 호전됨 - (건당 (쓰레드당) 처리시간이 610 밀리 미만으로 회복) => 요청 수락
-
-HTTP/1.1 201     2.24 secs:     207 bytes ==> POST http://localhost:8081/orders  
-HTTP/1.1 201     2.32 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.16 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.19 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.19 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.19 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.21 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.29 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.30 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.38 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.59 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.61 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.62 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     2.64 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.01 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.27 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.33 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.45 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.52 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.57 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.69 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.69 secs:     207 bytes ==> POST http://localhost:8081/orders
-
-* 이후 이러한 패턴이 계속 반복되면서 시스템은 도미노 현상이나 자원 소모의 폭주 없이 잘 운영됨
-
-HTTP/1.1 500     4.76 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.23 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.76 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.74 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.82 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.82 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.84 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.66 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     5.03 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.22 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.19 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.18 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.69 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.65 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     5.13 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.84 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.25 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.25 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.80 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.87 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.33 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.86 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.96 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.34 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 500     4.04 secs:     248 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.50 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.95 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.54 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     4.65 secs:     207 bytes ==> POST http://localhost:8081/orders
-
-:
-:
-
-Transactions:		        1025 hits
-Availability:		       63.55 %
-Elapsed time:		       59.78 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
-Successful transactions:        1025
-Failed transactions:	         588
-Longest transaction:	        9.20
-Shortest transaction:	        0.00
 
 ```
 - 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
-하지만, 63.55% 가 성공하였고, 46%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과
+하지만, 64.29% 가 성공하였고, 35.71%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과
 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
 - Retry 의 설정 (istio)
@@ -856,39 +754,43 @@ Shortest transaction:	        0.00
 ## 오토스케일 아웃
 - 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
-- 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
+- 요청(catch) 및 결제(payment)서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
+
 ```
-kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=15
+# auto scale-out 설정 (catch/kubernetes/deployment.yml, payment/kubernetes/deployment.yml)
 ```
+![image](https://user-images.githubusercontent.com/11955597/120108512-69ddbe00-c1a0-11eb-882e-4584d932db3b.png)
+
+
+```
+kubectl autoscale deploy catch --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
+```
+![image](https://user-images.githubusercontent.com/11955597/120108569-a4475b00-c1a0-11eb-9aac-69a5f36b3451.png)
+
+
+
 ---
 #### 검증 및 테스트
 - CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
+$ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080/catches POST {"price":"250000", "startingPoint":"Kwangjoo", "destination":"Chooncheon", "customer":"SteveOh", "status":"approve"}'
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
 kubectl get deploy pay -w
 ```
-- 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
-```
-NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-pay     1         1         1            1           17s
-pay     1         2         1            1           45s
-pay     1         4         1            1           1m
-:
-```
+- 어느정도 시간이 흐른 후 (약 30초 간격) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
+
+![image](https://user-images.githubusercontent.com/11955597/120108854-e7ee9480-c1a1-11eb-822e-b8fe208af184.png)
+
+![image](https://user-images.githubusercontent.com/11955597/120108848-dc9b6900-c1a1-11eb-9b06-4dd815932a23.png)
+
+
+
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
-```
-Transactions:		        5078 hits
-Availability:		       92.45 %
-Elapsed time:		       120 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
-```
+![image](https://user-images.githubusercontent.com/11955597/120108888-0d7b9e00-c1a2-11eb-9792-c2630c73dc2c.png)
+
 
 ## 무정지 재배포
 * 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
