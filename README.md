@@ -529,16 +529,16 @@ public class PolicyHandler{
 
 ```
 #배차처리
-http post "http://localhost:8081/catches" id=2000 price=10000 startingPoint="test2" destination='test2' customer='yoon'  status="approve" #Success
+http POST http://localhost:8081/catches price=150000 startingPoint=Kwangjoo destination=Chooncheon customer=Steve  status=approve   #Success
 ```
-![image](https://user-images.githubusercontent.com/45971330/119366849-56d47500-bcec-11eb-85f7-3f9553d3e5df.png)
+![image](https://user-images.githubusercontent.com/11955597/120089890-59dec380-c139-11eb-8eeb-46e957b35d05.png)
 
 -결제서비스(payment)가 정상적으로 동작했는지 조회
 
 ```
-http http://localhost:8083/payments 
+http http://localhost:8083/payments/4
 ```
-![image](https://user-images.githubusercontent.com/45971330/119367167-a4e97880-bcec-11eb-94e3-92e27fa84f8e.png)
+![image](https://user-images.githubusercontent.com/11955597/120089925-afb36b80-c139-11eb-94ff-0496e1f16e64.png)
 
 -pickup 서비스 재가동
 ```
@@ -548,15 +548,15 @@ mvn spring-boot:run
 -pickup service 요청 목록 확인
 
 ```
-http "http://localhost:8082/catchReqLists"     # 정상적으로 요청이 들어온 것 확인
+http http://localhost:8082/catchReqLists/4     # 정상적으로 요청이 들어온 것 확인
 ```
-![image](https://user-images.githubusercontent.com/45971330/119368460-0100cc80-bcee-11eb-85a0-a283cef8346b.png)
+![image](https://user-images.githubusercontent.com/11955597/120089986-ff923280-c139-11eb-911d-29540007037c.png)
 
 -pickup 기능 확인
 ```
-http "http://localhost:8082/pickUps" matchId=2000 driver="TESTBESTDRIVER" #정상적으로 매핑
+http http://localhost:8082/pickUps matchId=4 custmoer=Steve driver=Safemate   #정상적으로 매핑
 ```
-![image](https://user-images.githubusercontent.com/45971330/119368709-51782a00-bcee-11eb-8a20-1387ca5fcbb9.png)
+![image](https://user-images.githubusercontent.com/11955597/120090101-e938a680-c13a-11eb-9561-34ac7e434e2d.png)
 
 
 ## SAGA / Correlation
@@ -670,7 +670,7 @@ public class PolicyHandler{
 ```
 mypage view조회
 
-![image](https://user-images.githubusercontent.com/45971330/119369639-60aba780-bcef-11eb-94c2-7b0c909fd825.png)
+![image](https://user-images.githubusercontent.com/11955597/120090295-48e38180-c13c-11eb-9903-a845049e6862.png)
 
 
 # 베포 및 운영
