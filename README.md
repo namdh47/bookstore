@@ -326,19 +326,19 @@ public interface CatchRepository extends PagingAndSortingRepository<Catch, Long>
 - 적용 후 REST API 의 테스트
 ```
 # catch 서비스의 요청처리
-http POST http://localhost:8081/catches id=5000 price=25000 startingPoint=busan destination=seoul customer=kim  status=approve
+http POST http://localhost:8081/catches price=250000 startingPoint=Busan destination=Seoul customer=Peter  status=approve
 ```
-![image](https://user-images.githubusercontent.com/45971330/119359070-30124080-bce4-11eb-9ff6-d8a5a360687d.png)
+![image](https://user-images.githubusercontent.com/11955597/120089011-5b0bf280-c131-11eb-81c6-196659a8e810.png)
 ```
 # catch 서비스의 상태확인 
-http http://localhost:8081/catches/5000
+http http://localhost:8081/catches/2
 ```
-![image](https://user-images.githubusercontent.com/45971330/119359438-95fec800-bce4-11eb-8714-95975e4a7243.png)
+![image](https://user-images.githubusercontent.com/11955597/120089031-855db000-c131-11eb-96ca-e59c52f02afb.png)
 ```
 # catch 서비스에 대한 pickup 서비스의 응답
-http http://localhost:8082/pickUps matchId=5000 driver=BESTDRIVER
+http http://localhost:8082/pickUps matchId=2 custmoer=Peter driver=Speedmate
 ```
-![image](https://user-images.githubusercontent.com/45971330/119359816-f857c880-bce4-11eb-81ea-09c36f05ff20.png)
+![image](https://user-images.githubusercontent.com/11955597/120089073-eb4a3780-c131-11eb-9d74-c4367ce94426.png)
 
 
 ## 폴리글랏 퍼시스턴스
