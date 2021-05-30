@@ -765,8 +765,8 @@ $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080
 
 
 ```
-kubectl autoscale deploy catch --min=1 --max=10 --cpu-percent=15
-kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
+$ kubectl autoscale deploy catch --min=1 --max=10 --cpu-percent=15
+$ kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 ```
 ![image](https://user-images.githubusercontent.com/11955597/120108569-a4475b00-c1a0-11eb-9aac-69a5f36b3451.png)
 
@@ -780,7 +780,9 @@ $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
-kubectl get deploy pay -w
+$ kubectl get deploy catch -w
+$ kubectl get deploy payment -w
+$ kubectl get pod -w
 ```
 - 어느정도 시간이 흐른 후 (약 30초 간격) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
 
@@ -792,6 +794,8 @@ kubectl get deploy pay -w
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
 ![image](https://user-images.githubusercontent.com/11955597/120108888-0d7b9e00-c1a2-11eb-9792-c2630c73dc2c.png)
+![image](https://user-images.githubusercontent.com/11955597/120111684-dc08cf80-c1ad-11eb-910e-b47f00e2c03f.png)
+
 
 
 ## 무정지 재배포
