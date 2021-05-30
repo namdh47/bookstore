@@ -843,6 +843,7 @@ kubectl set image deploy catch catch=cnateam4.azurecr.io/catch:v2 -n default
 ![image](https://user-images.githubusercontent.com/11955597/120114260-525eff00-c1b9-11eb-9bea-c95c0ae59d05.png)
 
 * deployment.yml 설정 (catch 서비스)
+* 
 ![image](https://user-images.githubusercontent.com/11955597/120114310-94884080-c1b9-11eb-8d10-8f5205b1f500.png)
 
 * config map 생성 후 조회
