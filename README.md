@@ -793,7 +793,6 @@ $ kubectl get pod -w
 
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
-![image](https://user-images.githubusercontent.com/11955597/120108888-0d7b9e00-c1a2-11eb-9792-c2630c73dc2c.png)
 ![image](https://user-images.githubusercontent.com/11955597/120111684-dc08cf80-c1ad-11eb-910e-b47f00e2c03f.png)
 
 
@@ -801,6 +800,23 @@ $ kubectl get pod -w
 ## 무정지 재배포
 * 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
+
+```
+$ kubectl apply -f catch/kubernetes/deployment_readiness.yml
+```
+
+* readiness 옵션이 없는 경우 배포 중 서비스 요청처리 실패
+
+![image](https://user-images.githubusercontent.com/11955597/120112926-014c0c80-c1b3-11eb-93c3-f418209b69c8.png)
+
+
+* readiness 옵션이 추가된 deployment.yml을 적용
+```
+$ kubectl apply -f catch/kubernetes/deployment.yml
+```
+![image](https://user-images.githubusercontent.com/11955597/120112818-7c60f300-c1b2-11eb-951b-1514648b01ac.png)
+
+
 ```
 siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
 
@@ -832,12 +848,17 @@ Concurrency:		       96.02
 
 ```
 배포기간중 Availability 가 평소 100%에서 70% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
-```
+
 # deployment.yaml 의 readiness probe 의 설정:
 
 
+
+```
 kubectl apply -f kubernetes/deployment.yaml
 ```
+
+![image](https://user-images.githubusercontent.com/11955597/120112639-9f3ed780-c1b1-11eb-9e29-a6175abe096d.png)
+
 ---
 #### 검증 및 테스트
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
