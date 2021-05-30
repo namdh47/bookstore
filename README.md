@@ -835,9 +835,11 @@ kubectl set image deploy catch catch=cnateam4.azurecr.io/catch:v2 -n default
 * application.yml 설정 (catch 서비스)
 
 - default 부분
+
 ![image](https://user-images.githubusercontent.com/11955597/120114255-45daa680-c1b9-11eb-9d09-d3417b5df42f.png)
 
 - docker 부분
+
 ![image](https://user-images.githubusercontent.com/11955597/120114260-525eff00-c1b9-11eb-9bea-c95c0ae59d05.png)
 
 * deployment.yml 설정 (catch 서비스)
@@ -883,6 +885,7 @@ $ kubectl describe pod/catch-574665c7bc-z2tzj
 ## Self-healing (Liveness Probe)
 
 * catch 서비스 정상 확인
+
 ![image](https://user-images.githubusercontent.com/11955597/120116102-71fa2580-c1c1-11eb-8ca0-08adf9f6a34d.png)
 
 * deployment.yml (catch 서비스)에 Liveness Probe 옵션 추가
@@ -896,10 +899,12 @@ $ kubectl describe pod/catch-574665c7bc-z2tzj
 ![image](https://user-images.githubusercontent.com/11955597/120116153-b1287680-c1c1-11eb-992d-db264a3c1f86.png)
 
 * catch deploy 재배포 후 liveness 가 적용된 부분 확인
+
 ![image](https://user-images.githubusercontent.com/11955597/120116296-7c68ef00-c1c2-11eb-8d32-eeadd9eb555d.png)
 
 
 * catch 서비스의 liveness 가 발동되어 5번 retry 시도한 부분 확인
+
 ![image](https://user-images.githubusercontent.com/11955597/120116360-c2be4e00-c1c2-11eb-9e28-04d84b06f6bd.png)
 
 
