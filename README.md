@@ -831,6 +831,77 @@ kubectl set image deploy catch catch=cnateam4.azurecr.io/catch:v2 -n default
 ![image](https://user-images.githubusercontent.com/11955597/120113867-6f92ce00-c1b7-11eb-848c-e773d98f9ea4.png)
 
 
+## Config Map
+* application.yml 설정 (catch 서비스)
+
+- default 부분
+![image](https://user-images.githubusercontent.com/11955597/120114255-45daa680-c1b9-11eb-9d09-d3417b5df42f.png)
+
+- docker 부분
+![image](https://user-images.githubusercontent.com/11955597/120114260-525eff00-c1b9-11eb-9bea-c95c0ae59d05.png)
+
+* deployment.yml 설정 (catch 서비스)
+![image](https://user-images.githubusercontent.com/11955597/120114310-94884080-c1b9-11eb-8d10-8f5205b1f500.png)
+
+* config map 생성 후 조회
+```
+$ kubectl create configmap apiurl --from-literal=url=http://payment:8080 --from-literal=fluentd-server-ip=10.xxx.xxx.xxx -n default
+```
+![image](https://user-images.githubusercontent.com/11955597/120114378-edf06f80-c1b9-11eb-8585-dac97058bb1b.png)
+
+* 설정한 URL로 택시요청 호출
+```
+http POST http://catch:8080/catches price=250000 startingPoint=Busan destination=Seoul customer=Peter  status=approve
+```
+![image](https://user-images.githubusercontent.com/11955597/120114562-a3bbbe00-c1ba-11eb-8c04-4c52713c4abd.png)
+
+* config map 삭제 후 catch 서비스 재시작
+```
+$ kubectl delete configmap apiurl -n default
+$ kubectl get pod/catch-574665c7bc-n6dn2 -n default -o yaml | kubectl replace --force -f- 
+```
+![image](https://user-images.githubusercontent.com/11955597/120114992-b931e780-c1bc-11eb-888b-887d8f16027c.png)
+
+![image](https://user-images.githubusercontent.com/11955597/120115006-c6e76d00-c1bc-11eb-9200-2dd35d2f9ed5.png)
+
+* config map 삭제된 상태에서 주문 호출
+```
+http POST http://catch:8080/catches price=250000 startingPoint=Busan destination=Seoul customer=Peter  status=approve
+```
+![image](https://user-images.githubusercontent.com/11955597/120115086-175eca80-c1bd-11eb-9653-31213696b36e.png)
+
+![image](https://user-images.githubusercontent.com/11955597/120115125-44ab7880-c1bd-11eb-82ff-496c62732d08.png)
+
+```
+$ kubectl get pod/catch-574665c7bc-z2tzj -o yaml
+$ kubectl describe pod/catch-574665c7bc-z2tzj
+```
+![image](https://user-images.githubusercontent.com/11955597/120115219-a23fc500-c1bd-11eb-84ec-f8acf0fd2bf3.png)
+![image](https://user-images.githubusercontent.com/11955597/120115282-ecc14180-c1bd-11eb-947e-179722c287b9.png)
+
+
+## Self-healing (Liveness Probe)
+
+* catch 서비스 정상 확인
+![image](https://user-images.githubusercontent.com/11955597/120116102-71fa2580-c1c1-11eb-8ca0-08adf9f6a34d.png)
+
+* deployment.yml (catch 서비스)에 Liveness Probe 옵션 추가
+```
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 5
+```
+![image](https://user-images.githubusercontent.com/11955597/120116153-b1287680-c1c1-11eb-992d-db264a3c1f86.png)
+
+* catch deploy 재배포 후 liveness 가 적용된 부분 확인
+![image](https://user-images.githubusercontent.com/11955597/120116296-7c68ef00-c1c2-11eb-8d32-eeadd9eb555d.png)
+
+
+* catch 서비스의 liveness 가 발동되어 5번 retry 시도한 부분 확인
+![image](https://user-images.githubusercontent.com/11955597/120116360-c2be4e00-c1c2-11eb-9e28-04d84b06f6bd.png)
+
 
 
 # --------------------------------이하 수정 필요
