@@ -739,7 +739,9 @@ $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080
 * 부하 발생하여 CB가 발동하여 요청 실패처리하였고, 밀린 부하가 pay에서 처리되면서 다시 order를 받기 시작
 ![image](https://user-images.githubusercontent.com/11955597/120107709-1027c480-c19d-11eb-90fd-7cda05bbb08b.png)
 
+
 * report
+
 ![image](https://user-images.githubusercontent.com/11955597/120108116-b32d0e00-c19e-11eb-9ca5-684a9f32590b.png)
 
 
