@@ -817,63 +817,21 @@ $ kubectl apply -f catch/kubernetes/deployment.yml
 ![image](https://user-images.githubusercontent.com/11955597/120112818-7c60f300-c1b2-11eb-951b-1514648b01ac.png)
 
 
+* 새버전으로의 배포 시작
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"item": "chicken"}'
-
-** SIEGE 4.0.5
-** Preparing 100 concurrent users for battle.
-The server is now under siege...
-
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.68 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-HTTP/1.1 201     0.70 secs:     207 bytes ==> POST http://localhost:8081/orders
-:
-
-```
-- 새버전으로의 배포 시작
-```
-kubectl set image ...
-```
-- seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
-```
-Transactions:		        3078 hits
-Availability:		       70.45 %
-Elapsed time:		       120 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
-
-```
-배포기간중 Availability 가 평소 100%에서 70% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
-
-# deployment.yaml 의 readiness probe 의 설정:
-
-
-
-```
-kubectl apply -f kubernetes/deployment.yaml
+kubectl set image deploy catch catch=cnateam4.azurecr.io/catch:v2 -n default
 ```
 
-![image](https://user-images.githubusercontent.com/11955597/120112639-9f3ed780-c1b1-11eb-9e29-a6175abe096d.png)
+* 기존 버전과 새 버전의 catch pod 공존 중
 
----
-#### 검증 및 테스트
-- 동일한 시나리오로 재배포 한 후 Availability 확인:
-```
-Transactions:		        3078 hits
-Availability:		       100 %
-Elapsed time:		       120 secs
-Data transferred:	        0.34 MB
-Response time:		        5.60 secs
-Transaction rate:	       17.15 trans/sec
-Throughput:		        0.01 MB/sec
-Concurrency:		       96.02
+![image](https://user-images.githubusercontent.com/11955597/120113839-525dff80-c1b7-11eb-97ec-6ff76ae07b4c.png)
 
-```
-배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
+* Availability : 100% 확인
+
+![image](https://user-images.githubusercontent.com/11955597/120113867-6f92ce00-c1b7-11eb-848c-e773d98f9ea4.png)
+
+
+
 
 # --------------------------------이하 수정 필요
 # 신규 개발 조직의 추가
