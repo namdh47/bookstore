@@ -734,6 +734,7 @@ $ kubectl exec -it siege -c siege -n default -- /bin/bash
 - 60초 동안 10번 반복하여 실시
 ```
 $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080/catches POST {"price":"250000", "startingPoint":"Kwangjoo", "destination":"Chooncheon", "customer":"SteveOh", "status":"approve"}'
+```
 
 * 부하 발생하여 CB가 발동하여 요청 실패처리하였고, 밀린 부하가 pay에서 처리되면서 다시 order를 받기 시작
 ![image](https://user-images.githubusercontent.com/11955597/120107709-1027c480-c19d-11eb-90fd-7cda05bbb08b.png)
@@ -742,7 +743,6 @@ $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080
 ![image](https://user-images.githubusercontent.com/11955597/120108116-b32d0e00-c19e-11eb-9ca5-684a9f32590b.png)
 
 
-```
 - 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 하지만, 64.29% 가 성공하였고, 35.71%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과
 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
