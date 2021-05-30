@@ -427,9 +427,9 @@ public interface PaymentService {
 # 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
 
 #주문처리
-http post "http://localhost:8081/catches" id=4000 price=20000 startingPoint="test1" destination='test1' customer='lee'  status="approve" # Fail
+http POST http://localhost:8081/catches price=200000 startingPoint=Daejeon destination=Seoul customer=David  status=approve   # Fail
 ```
-![image](https://user-images.githubusercontent.com/45971330/119361205-5e911b00-bce6-11eb-8f9b-b6053ae3fdef.png)
+![image](https://user-images.githubusercontent.com/11955597/120089415-08343a00-c135-11eb-9e81-c4daca7ce905.png)
 
 ```
 #결제서비스 재기동
@@ -437,9 +437,9 @@ cd payment
 mvn spring-boot:run
 
 #주문처리
-http post "http://localhost:8081/catches" id=4000 price=20000 startingPoint="test1" destination='test1' customer='lee'  status="approve" #
+http POST http://localhost:8081/catches price=200000 startingPoint=Daejeon destination=Seoul customer=David  status=approve   # Success
 ```
-![image](https://user-images.githubusercontent.com/45971330/119361540-c0518500-bce6-11eb-9307-9b4736f544a5.png)
+![image](https://user-images.githubusercontent.com/11955597/120089493-d66fa300-c135-11eb-8c8e-27e6b0390282.png)
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
 
