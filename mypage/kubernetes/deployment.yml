@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mypage
+  namespace: default
   labels:
     app: mypage
 spec:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mypage
-          image: username/mypage:latest
+          image: cnateam4.azurecr.io/mypage:latest
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -35,3 +36,8 @@ spec:
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 5
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
