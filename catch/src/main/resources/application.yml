@@ -35,6 +35,15 @@ spring:
           destination: taxiteam
           contentType: application/json
 
+feign:
+  hystrix:
+    enabled: true
+
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 610
+
 api:
   payment:
     url: http://localhost:8083
@@ -70,6 +79,16 @@ spring:
         event-out:
           destination: taxiteam
           contentType: application/json
+
+feign:
+  hystrix:
+    enabled: true
+
+hystrix:
+  command:
+    default:
+      execution.isolation.thread.timeoutInMilliseconds: 610
+
 api:
   payment:
-    url: http://payment:8080
+    url: ${configurl}
