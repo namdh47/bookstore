@@ -227,6 +227,7 @@ import java.util.Date;
 public class Catch {
 
     @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     private Integer price;
     private String startingPoint;
