@@ -16,13 +16,19 @@ public class Payment {
     private String customer;
     private String startingPoint;
     private String destination;
+    
     @PostPersist
     public void onPostPersist(){
         PaymentApproved paymentApproved = new PaymentApproved();
         BeanUtils.copyProperties(this, paymentApproved);
         paymentApproved.publishAfterCommit();
 
-
+//        try {
+//            Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+//            System.out.println("=============결재 승인 완료=============");
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
     
     @PostUpdate      
