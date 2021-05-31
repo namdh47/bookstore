@@ -155,9 +155,13 @@
 
 ![image](https://user-images.githubusercontent.com/81601230/119946576-bc1cb480-bfd1-11eb-96f4-84252a9e4452.png)
     - 고객이 주문을 취소할 수 있다 (ok)
+
     - 주문이 취소되면 택시 매칭이 취소된다 (ok)
+    
     - 고객이 주문상태를 중간중간 조회한다 (View-green sticker 의 추가로 ok)
+    
     - 주문, 매칭 상태가 바뀔 때 마다 mypage를 통해 확인한다 (?)
+    
     -------------------추가 수정필요 여부 확인 필요(modified by 피터오)
 
 
