@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catch
+  namespace: default
   labels:
     app: catch
 spec:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
         - name: catch
-          image: username/catch:latest
+          image: cnateam4.azurecr.io/catch:latest
           ports:
             - containerPort: 8080
           env:
@@ -41,3 +42,8 @@ spec:
             timeoutSeconds: 2
             periodSeconds: 5
             failureThreshold: 5
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
