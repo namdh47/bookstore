@@ -690,6 +690,7 @@ pipeline build script 는 각 프로젝트 폴더 이하에 Dockerfile 과 deplo
 ![image](https://user-images.githubusercontent.com/11955597/120874755-1bd31b00-c5e3-11eb-8d16-d02850bd775c.png)
 ![image](https://user-images.githubusercontent.com/11955597/120958041-cee17700-c791-11eb-8dc8-81466f578aca.png)
 ![image](https://user-images.githubusercontent.com/11955597/120957907-7dd18300-c791-11eb-97b0-3aa3d667808d.png)
+![image](https://user-images.githubusercontent.com/11955597/120959115-0ea95e00-c794-11eb-812c-c916d3dba919.png)
 
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
