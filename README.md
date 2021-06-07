@@ -177,7 +177,7 @@
     - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
     - 고객 주문 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문완료 시 결제처리에 대해서는 Request-Response 방식 처리
     - 결제 완료 시 기사연결 매칭처리:  catch 에서 pickup 마이크로서비스로 매칭요청이 전달되는 과정에 있어서 pickup 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
-    - 나머지 모든 inter-microservice 트랜잭션: 결재상태, 매칭상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+    - 나머지 모든 inter-microservice 트랜잭션: 결재상태, 매칭상태 등 모든 이벤트에 대해 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
 ## 헥사고날 아키텍처 다이어그램 도출
@@ -918,70 +918,48 @@ $ kubectl describe pod/catch-574665c7bc-z2tzj
 ![image](https://user-images.githubusercontent.com/11955597/120116360-c2be4e00-c1c2-11eb-9e28-04d84b06f6bd.png)
 
 
-
-# --------------------------------이하 수정 필요
 # 신규 개발 조직의 추가
-  ![image](https://user-images.githubusercontent.com/487999/79684133-1d6c4300-826a-11ea-94a2-602e61814ebf.png)
+![image](https://user-images.githubusercontent.com/81601230/120946690-46a2a800-c778-11eb-99be-a15fd88c0a73.png)
 
 
 ## 마케팅팀의 추가
     - KPI: 신규 고객의 유입률 증대와 기존 고객의 충성도 향상
-    - 구현계획 마이크로 서비스: 기존 customer 마이크로 서비스를 인수하며, 고객에 음식 및 맛집 추천 서비스 등을 제공할 예정
+    - 구현계획 마이크로 서비스: 기존 mypage 마이크로 서비스를 인수하며, 고객에 경로 및 호출 추천 서비스 등을 제공할 예정 (구글 맵 기능과 유사)
+
 
 ## 이벤트 스토밍 
-  ![image](https://user-images.githubusercontent.com/487999/79685356-2b729180-8273-11ea-9361-a434065f2249.png)
+![image](https://user-images.githubusercontent.com/81601230/120946698-4e624c80-c778-11eb-91f7-c71940f269d7.png)
 
 
 ## 헥사고날 아키텍처 변화 
+![image](https://user-images.githubusercontent.com/81601230/120946684-40acc700-c778-11eb-85ca-a7da54831f12.png)
 
-![image](https://user-images.githubusercontent.com/487999/79685243-1d704100-8272-11ea-8ef6-f4869c509996.png)
 
 ## 구현  
+기존 마이크로서비스에 수정을 발생시키지 않도록 Inbound 요청을 REST 가 아닌 Event Pub/Sub 방식으로 구현.
+기존 마이크로서비스의 아키텍쳐나 데이터베이스 변동 없이 추가함. 
 
-기존의 마이크로 서비스에 수정을 발생시키지 않도록 Inbund 요청을 REST 가 아닌 Event 를 Subscribe 하는 방식으로 구현. 기존 마이크로 서비스에 대하여 아키텍처나 기존 마이크로 서비스들의 데이터베이스 구조와 관계없이 추가됨. 
 
 ## 운영과 Retirement
+Request/Response 방식으로 구현하지 않았기 때문에 서비스가 더이상 불필요해져도 Deployment 에서 제거되면 기존 마이크로서비스에 어떤 영향도 주지 않음.
 
-Request/Response 방식으로 구현하지 않았기 때문에 서비스가 더이상 불필요해져도 Deployment 에서 제거되면 기존 마이크로 서비스에 어떤 영향도 주지 않음.
+* 결제(payment) 마이크로서비스의 경우 API 변화나 Retire 시에 택시 호출(catch) 마이크로서비스의 변경을 초래함:
 
-* [비교] 결제 (pay) 마이크로서비스의 경우 API 변화나 Retire 시에 app(주문) 마이크로 서비스의 변경을 초래함:
-
-예) API 변화시
 ```
-# Order.java (Entity)
+# Catch.java (Entity)
 
-    @PostPersist
-    public void onPostPersist(){
-
-        fooddelivery.external.결제이력 pay = new fooddelivery.external.결제이력();
-        pay.setOrderId(getOrderId());
+        @PostPersist
+    	public void onPostPersist(){
+	
+	...
         
-        Application.applicationContext.getBean(fooddelivery.external.결제이력Service.class)
-                .결제(pay);
+        taxiteam.external.Payment payment = new taxiteam.external.Payment();
+	
+	...
 
-                --> 
+        CatchApplication.applicationContext.getBean(taxiteam.external.PaymentService.class)
+            .paymentRequest(payment);
 
-        Application.applicationContext.getBean(fooddelivery.external.결제이력Service.class)
-                .결제2(pay);
-
-    }
-```
-
-예) Retire 시
-```
-# Order.java (Entity)
-
-    @PostPersist
-    public void onPostPersist(){
-
-        /**
-        fooddelivery.external.결제이력 pay = new fooddelivery.external.결제이력();
-        pay.setOrderId(getOrderId());
-        
-        Application.applicationContext.getBean(fooddelivery.external.결제이력Service.class)
-                .결제(pay);
-
-        **/
     }
 ```
 
