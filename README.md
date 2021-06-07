@@ -872,7 +872,7 @@ $ kubectl create configmap apiurl --from-literal=url=http://payment:8080 --from-
 ```
 ![image](https://user-images.githubusercontent.com/11955597/120114378-edf06f80-c1b9-11eb-8585-dac97058bb1b.png)
 
-* 설정한 URL로 택시요청 호출
+* 위 config map으로 배포한 서비스에서 설정한 URL로 택시요청 호출
 ```
 http POST http://catch:8080/catches price=250000 startingPoint=Busan destination=Seoul customer=Peter  status=approve
 ```
