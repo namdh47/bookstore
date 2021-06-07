@@ -772,9 +772,6 @@ $ siege -c100 -t60S -r10 -v --content-type "application/json" 'http://catch:8080
 하지만, 64.29% 가 성공하였고, 35.71%가 실패했다는 것은 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과
 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
-- Retry 의 설정 (istio)
-- Availability 가 높아진 것을 확인 (siege)
-
 
 ## 오토스케일 아웃
 - 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
