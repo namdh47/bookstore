@@ -692,6 +692,20 @@ pipeline build script 는 각 프로젝트 폴더 이하에 Dockerfile 과 deplo
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 * 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
+```
+# PaymentService.java (catch external 서비스)
+
+//@FeignClient(name="payment", url="http://localhost:8083")
+@FeignClient(name="payment", url="${api.payment.url}")
+public interface PaymentService {
+
+    @RequestMapping(method= RequestMethod.POST, path="/payments")
+    public void paymentRequest(@RequestBody Payment payment);
+
+}
+
+```
+
 - 시나리오는 택시 요청(catch)-->결제(payment) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB(Circuit Breaker) 를 통하여 장애격리.
 - Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
 ```
